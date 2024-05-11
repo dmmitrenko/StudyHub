@@ -34,7 +34,7 @@ jobs:
       with:
         name: functionapp
         path: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-  deploy:
+deploy:
     runs-on: windows-latest
     needs: build
     steps:
@@ -43,9 +43,12 @@ jobs:
       with:
         name: functionapp
         path: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
     - name: Deploy to Azure Function App
       uses: Azure/functions-action@v1
       with:
         app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-        publish-profile: ${{ secrets.NAUHUB_64D8 }}
         package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
