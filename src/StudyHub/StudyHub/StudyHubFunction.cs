@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using StudyHub.Domain.Enums;
 using StudyHub.Infrastructure.Services;
 using Telegram.Bot.Types.ReplyMarkups;
+using StudyHub.Application.Handlers;
 
 namespace StudyHub
 {
@@ -104,7 +105,6 @@ namespace StudyHub
         private async Task BotOnMessageReceived(Message? message, CancellationToken cancellationToken)
         {
             var command = message.Text.Split(new[] { ' ' })[0];
-            var isHelpNeeded = message.Text.Contains("-help");
 
             if (!CommandMappings.TryGetValue(command, out var parsedCommand))
             {
@@ -120,27 +120,59 @@ namespace StudyHub
             var response = await _commandProcessor.HandleCommand(message, parsedCommand, cancellationToken);
 
             await _telegramBot.SendTextMessageAsync(
-                chatId: message.Chat.Id,
-                text: "Choose date:",
-                replyMarkup: response.Response as InlineKeyboardMarkup
-            );
+                    chatId: message.Chat.Id,
+                    text: "Please choose a month:",
+                    replyMarkup: AddReminderCommandHandler.GetMonthSelection()
+                );
         }
 
         public async Task HandleCallbackQuery(CallbackQuery callbackQuery)
         {
-            if (callbackQuery.Data.StartsWith("choose_"))
-            {
-                string[] parts = callbackQuery.Data.Split('_');
-                int year = int.Parse(parts[1]);
-                int month = int.Parse(parts[2]);
-                int day = int.Parse(parts[3]);
-                DateTime chosenDate = new DateTime(year, month, day);
+            var parts = callbackQuery.Data.Split('_');
+            var command = parts[0];
+            int year = DateTime.Now.Year;
+            int month, day;
 
-                await _telegramBot.AnswerCallbackQueryAsync(callbackQuery.Id);
-                await _telegramBot.SendTextMessageAsync(
-                    chatId: callbackQuery.Message.Chat.Id,
-                    text: $"You selected: {chosenDate.ToShortDateString()}"
-                );
+            switch (command)
+            {
+                case "month":
+                    month = int.Parse(parts[1]);
+                    await _telegramBot.EditMessageTextAsync(
+                        chatId: callbackQuery.Message.Chat.Id,
+                        messageId: callbackQuery.Message.MessageId,
+                        text: "Please choose a day:",
+                        replyMarkup: AddReminderCommandHandler.GetDaySelection(year, month)
+                    );
+                    break;
+                case "day":
+                    month = int.Parse(parts[1]);
+                    day = int.Parse(parts[2]);
+                    await _telegramBot.EditMessageTextAsync(
+                        chatId: callbackQuery.Message.Chat.Id,
+                        messageId: callbackQuery.Message.MessageId,
+                        text: "Please choose a time:",
+                        replyMarkup: AddReminderCommandHandler.GetTimeSelection(year, month, day)
+                    );
+                    break;
+                case "time":
+                    month = int.Parse(parts[1]);
+                    day = int.Parse(parts[2]);
+                    int hour = int.Parse(parts[3]);
+                    int minute = int.Parse(parts[4]);
+                    var selectedTime = new DateTime(year, month, day, hour, minute, 0);
+                    await _telegramBot.EditMessageTextAsync(
+                        chatId: callbackQuery.Message.Chat.Id,
+                        messageId: callbackQuery.Message.MessageId,
+                        text: $"You selected: {selectedTime}",
+                        replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("Confirm", "confirm"))
+                    );
+                    break;
+                case "confirm":
+                    await _telegramBot.SendTextMessageAsync(
+                        chatId: callbackQuery.Message.Chat.Id,
+                        text: "Your reminder has been set!"
+                    );
+                    break;
             }
         }
     }
