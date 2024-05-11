@@ -1,10 +1,10 @@
-name: Build and deploy .NET Core application to Function App NAUHUB
+name: Build and deploy .NET Core application to Function App StudyHubb2024
 on:
   push:
     branches:
     - main
 env:
-  AZURE_FUNCTIONAPP_NAME: NAUHUB
+  AZURE_FUNCTIONAPP_NAME: StudyHubb2024
   AZURE_FUNCTIONAPP_PACKAGE_PATH: StudyHub\published
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 8.0.x
@@ -43,12 +43,9 @@ jobs:
       with:
         name: functionapp
         path: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-    - name: Login to Azure
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
     - name: Deploy to Azure Function App
       uses: Azure/functions-action@v1
       with:
         app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+        publish-profile: ${{ secrets.StudyHubb2024_7219 }}
         package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
