@@ -5,11 +5,14 @@ using StudyHub.Extensions;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWebApplication()
-    .ConfigureServices(services =>
+    .ConfigureServices((context, services) =>
     {
         services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
         services.ConfigureTelegramBot();
+        services.ConfigureAutomapper();
+        services.ConfigureServices();
+        services.ConfigureSettings(context.Configuration);
     })
     .Build();
 

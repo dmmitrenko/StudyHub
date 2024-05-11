@@ -7,6 +7,9 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types;
 using Azure.Core;
 using Newtonsoft.Json;
+using StudyHub.Domain.Enums;
+using StudyHub.Infrastructure.Services;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace StudyHub
 {
@@ -14,13 +17,20 @@ namespace StudyHub
     {
         private readonly ILogger<StudyHubFunction> _logger;
         private readonly ITelegramBotClient _telegramBot;
+        private readonly ICommandProcessor _commandProcessor;
+        private readonly Dictionary<string, Commands> CommandMappings = new Dictionary<string, Commands>
+        {
+            { "/remind", Commands.Remind },
+        };
 
         public StudyHubFunction(
             ILogger<StudyHubFunction> logger,
-            ITelegramBotClient telegramBot)
+            ITelegramBotClient telegramBot,
+            ICommandProcessor commandProcessor)
         {
             _logger = logger;
             _telegramBot = telegramBot;
+            _commandProcessor = commandProcessor;
         }
 
         [Function("StudyHub")]
@@ -87,16 +97,50 @@ namespace StudyHub
 
         private async Task BotOnCallbackQueryReceived(CallbackQuery? callbackQuery, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await HandleCallbackQuery(callbackQuery);
         }
 
         private async Task BotOnMessageReceived(Message? message, CancellationToken cancellationToken)
         {
+            var command = message.Text.Split(new[] { ' ' })[0];
+            var isHelpNeeded = message.Text.Contains("-help");
+
+            if (!CommandMappings.TryGetValue(command, out var parsedCommand))
+            {
+                await _telegramBot.SendTextMessageAsync(
+                    message.Chat.Id,
+                    "In progress!",
+                    disableWebPagePreview: true,
+                    parseMode: ParseMode.Html);
+
+                return;
+            }
+
+            var response = await _commandProcessor.HandleCommand(message, parsedCommand, cancellationToken);
+
             await _telegramBot.SendTextMessageAsync(
-                message.Chat.Id,
-                "Hello world!",
-                disableWebPagePreview: true,
-                parseMode: ParseMode.Html);
+                chatId: message.Chat.Id,
+                text: "Choose a date:",
+                replyMarkup: response.Response as InlineKeyboardMarkup
+            );
+        }
+
+        public async Task HandleCallbackQuery(CallbackQuery callbackQuery)
+        {
+            if (callbackQuery.Data.StartsWith("choose_"))
+            {
+                string[] parts = callbackQuery.Data.Split('_');
+                int year = int.Parse(parts[1]);
+                int month = int.Parse(parts[2]);
+                int day = int.Parse(parts[3]);
+                DateTime chosenDate = new DateTime(year, month, day);
+
+                await _telegramBot.AnswerCallbackQueryAsync(callbackQuery.Id);
+                await _telegramBot.SendTextMessageAsync(
+                    chatId: callbackQuery.Message.Chat.Id,
+                    text: $"You selected: {chosenDate.ToShortDateString()}"
+                );
+            }
         }
     }
 }
