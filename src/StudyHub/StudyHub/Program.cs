@@ -13,6 +13,7 @@ var host = new HostBuilder()
         services.ConfigureAutomapper();
         services.ConfigureServices();
         services.ConfigureSettings(context.Configuration);
+        services.AddRedis();
     })
     .Build();
 
