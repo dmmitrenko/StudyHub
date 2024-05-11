@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
+using StudyHub.Application.Cache;
 using StudyHub.Application.Handlers;
 using StudyHub.Application.MapperProfiles;
 using StudyHub.Application.Services;
@@ -55,5 +56,6 @@ public static class ServiceExtensions
 
         services.AddSingleton<IConnectionMultiplexer>(multiplexer);
         services.AddSingleton(provider => provider.GetService<IConnectionMultiplexer>().GetDatabase());
+        services.AddScoped<ICacheService, RedisCacheService>();
     }
 }
