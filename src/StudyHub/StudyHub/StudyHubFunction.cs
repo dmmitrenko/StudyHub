@@ -121,7 +121,7 @@ namespace StudyHub
 
             await _telegramBot.SendTextMessageAsync(
                 chatId: message.Chat.Id,
-                text: response.Message ?? null,
+                text: "Choose date:",
                 replyMarkup: response.Response as InlineKeyboardMarkup
             );
         }
