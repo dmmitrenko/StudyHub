@@ -41,7 +41,7 @@ public class CommandProcessor : ICommandProcessor
     {
         var parts = messageText.Split(" ", 2);
 
-        if (string.IsNullOrEmpty(parts[1]))
+        if (parts.Length == 1)
         {
             return "";
         }

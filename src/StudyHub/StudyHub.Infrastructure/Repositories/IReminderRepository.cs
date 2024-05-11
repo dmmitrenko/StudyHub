@@ -5,5 +5,5 @@ public interface IReminderRepository
 {
     Task AddReminder(Reminder reminder);
     Task DeleteReminder(Reminder reminder);
-    Task<Reminder> GetReminders(long chatId, DateTime sendTime);
+    Task<List<Reminder>> GetReminders(long chatId);
 }

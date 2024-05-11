@@ -11,6 +11,7 @@ using StudyHub.Domain.Enums;
 using StudyHub.Infrastructure.Services;
 using Telegram.Bot.Types.ReplyMarkups;
 using StudyHub.Application.Handlers;
+using StudyHub.Domain.Models;
 
 namespace StudyHub
 {
@@ -24,6 +25,7 @@ namespace StudyHub
         {
             { "/remind", Commands.Remind },
             { "/feedback", Commands.GetFeedback },
+            { "/getReminders", Commands.GetReminders }
         };
 
         public StudyHubFunction(
@@ -141,6 +143,13 @@ namespace StudyHub
                     break;
                 case Commands.GetFeedback:
                     break;
+                case Commands.GetReminders:
+                    var reminders = response.Response as List<Reminder>;
+                    await _telegramBot.SendTextMessageAsync(
+                        chatId: message.Chat.Id,
+                        text: "Your reminders:\n" + string.Join("\n", reminders.Select(s => $"&#128073 <code> {s.Text} {s.SendTime} </code>")),
+                        parseMode: ParseMode.Html);
+                    break;
                 default:
                     break;
             }
@@ -199,7 +208,8 @@ namespace StudyHub
                     break;
 
                 case "confirm":
-                    var title = await _cacheService.GetCachedReminderTitle(callbackQuery.Message.Chat.Id.ToString());
+                    //var title = await _cacheService.GetCachedReminderTitle(callbackQuery.Message.Chat.Id.ToString());
+                    var title = "курсова";
                     callbackQuery.Data += $"_{title}";
                     await _commandProcessor.HandleCommand(callbackQuery, Commands.Remind);
                     await _telegramBot.SendTextMessageAsync(

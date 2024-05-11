@@ -10,7 +10,8 @@ public class ReminderRepository : IReminderRepository
     private const string TableName = nameof(Reminder);
     private readonly IMapper _mapper;
 
-    public ReminderRepository(IMapper mapper)
+    public ReminderRepository(
+        IMapper mapper)
     {
         _mapper = mapper;
     }
@@ -29,21 +30,27 @@ public class ReminderRepository : IReminderRepository
         await tableClient.DeleteEntityAsync(entity.PartitionKey, entity.RowKey, entity.ETag);
     }
 
-    public async Task<Reminder> GetReminders(long chatId, DateTime sendTime)
+    public async Task<List<Reminder>> GetReminders(long chatId)
     {
         var tableClient = await GetTableClient();
         string partitionKey = chatId.ToString();
-        string rowKey = sendTime.ToString("o");
+
+        List<Reminder> reminders = new List<Reminder>();
 
         try
         {
-            var response = await tableClient.GetEntityAsync<Entities.Reminder>(partitionKey, rowKey);
-            return _mapper.Map<Reminder>(response.Value);
+            await foreach (var entity in tableClient.QueryAsync<Entities.Reminder>(filter: $"PartitionKey eq '{partitionKey}'"))
+            {
+                reminders.Add(_mapper.Map<Reminder>(entity));
+            }
         }
-        catch (RequestFailedException e) when (e.Status == 404)
+        catch (RequestFailedException e)
         {
+            Console.WriteLine($"An error occurred: {e.Message}");
             return null;
         }
+
+        return reminders;
     }
 
     private async Task<TableClient> GetTableClient(CancellationToken cancellationToken = default)

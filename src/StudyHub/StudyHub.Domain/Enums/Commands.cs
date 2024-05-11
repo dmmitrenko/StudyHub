@@ -4,5 +4,6 @@ public enum Commands
     Undefined,
     Remind,
     AddFeedback,
-    GetFeedback
+    GetFeedback,
+    GetReminders
 }

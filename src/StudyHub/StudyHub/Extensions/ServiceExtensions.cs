@@ -35,6 +35,7 @@ public static class ServiceExtensions
     {
         services.AddScoped<ICommandProcessor, CommandProcessor>();
         services.AddScoped<ICommandHandler, AddReminderCommandHandler>();
+        services.AddScoped<ICommandHandler, GetRemindersCommandHandler>();
         services.AddScoped<IReminderRepository, ReminderRepository>();
     }
 

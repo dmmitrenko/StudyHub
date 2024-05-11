@@ -46,8 +46,9 @@ public class AddReminderCommandHandler : ICommandHandler
         var day = int.Parse(parts[3]);
         var hour = int.Parse(parts[4]);
         var minute = int.Parse(parts[5]);
-        var title = parts[6];
-        var selectedTime = new DateTime(year, month, day, hour, minute, 0);
+        var seconds = int.Parse(parts[6]);
+        var title = parts[7];
+        var selectedTime = new DateTime(year, month, day, hour, minute, seconds);
 
         var reminder = new Reminder
         {
