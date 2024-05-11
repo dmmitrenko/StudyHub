@@ -144,7 +144,7 @@ namespace StudyHub
                         replyMarkup: AddReminderCommandHandler.GetDaySelection(year, month)
                     );
                     break;
-                case "day":
+                case "date":
                     month = int.Parse(parts[1]);
                     day = int.Parse(parts[2]);
                     await _telegramBot.EditMessageTextAsync(
