@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Azure;
 using Azure.Data.Tables;
-using StudyHub.Domain;
+using StudyHub.Domain.Models;
 using StudyHub.Infrastructure.Repositories;
 
 namespace StudyHub.DataContext.Repositories;

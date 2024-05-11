@@ -1,4 +1,4 @@
-﻿using StudyHub.Domain;
+﻿using StudyHub.Domain.Models;
 
 namespace StudyHub.Infrastructure.Repositories;
 public interface IReminderRepository

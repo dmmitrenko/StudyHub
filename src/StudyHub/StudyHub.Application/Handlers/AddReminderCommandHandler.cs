@@ -71,14 +71,22 @@ public class AddReminderCommandHandler : ICommandHandler
     {
         var months = new[]
         {
-            "January", "February", "March", "April",
-            "May", "June", "July", "August",
-            "September", "October", "November", "December"
-        };
-        var keyboard = new List<InlineKeyboardButton[]>();
-        for (int i = 0; i < months.Length; i++)
+        "Січень", "Лютий", "Березень",
+        "Квітень", "Травень", "Червень",
+        "Липень", "Серпень", "Вересень",
+        "Жовтень", "Листопад", "Грудень"
+    };
+
+        var keyboard = new List<List<InlineKeyboardButton>>();
+        for (int i = 0; i < months.Length; i += 3)
         {
-            keyboard.Add(new[] { InlineKeyboardButton.WithCallbackData(months[i], $"month_{i + 1}") });
+            var row = new List<InlineKeyboardButton>
+        {
+            InlineKeyboardButton.WithCallbackData(months[i], $"month_{i + 1}"),
+            InlineKeyboardButton.WithCallbackData(months[i + 1], $"month_{i + 2}"),
+            InlineKeyboardButton.WithCallbackData(months[i + 2], $"month_{i + 3}")
+        };
+            keyboard.Add(row);
         }
         return new InlineKeyboardMarkup(keyboard);
     }
@@ -86,23 +94,31 @@ public class AddReminderCommandHandler : ICommandHandler
     public static InlineKeyboardMarkup GetDaySelection(int year, int month)
     {
         var daysInMonth = DateTime.DaysInMonth(year, month);
-        var keyboard = new List<InlineKeyboardButton[]>();
-        for (int day = 1; day <= daysInMonth; day++)
+        var keyboard = new List<List<InlineKeyboardButton>>();
+        for (int day = 1; day <= daysInMonth; day += 7)
         {
-            keyboard.Add(new[] { InlineKeyboardButton.WithCallbackData(day.ToString(), $"day_{month}_{day}") });
+            var row = new List<InlineKeyboardButton>();
+            for (int d = 0; d < 7 && day + d <= daysInMonth; d++)
+            {
+                row.Add(InlineKeyboardButton.WithCallbackData((day + d).ToString(), $"date_{year}_{month}_{day + d}"));
+            }
+            keyboard.Add(row);
         }
         return new InlineKeyboardMarkup(keyboard);
     }
 
     public static InlineKeyboardMarkup GetTimeSelection(int year, int month, int day)
     {
-        var keyboard = new List<InlineKeyboardButton[]>();
-        for (int hour = 0; hour < 24; hour += 1)
+        var keyboard = new List<List<InlineKeyboardButton>>();
+        for (int hour = 0; hour < 24; hour += 6)
         {
-            for (int minute = 0; minute < 60; minute += 30)
+            var row = new List<InlineKeyboardButton>();
+            for (int h = hour; h < hour + 6 && h < 24; h++)
             {
-                keyboard.Add(new[] { InlineKeyboardButton.WithCallbackData($"{hour:00}:{minute:00}", $"time_{month}_{day}_{hour}_{minute}") });
+                row.Add(InlineKeyboardButton.WithCallbackData($"{h}:00", $"time_{month}_{day}_{h}_0"));
+                row.Add(InlineKeyboardButton.WithCallbackData($"{h}:30", $"time_{month}_{day}_{h}_30"));
             }
+            keyboard.Add(row);
         }
         return new InlineKeyboardMarkup(keyboard);
     }
