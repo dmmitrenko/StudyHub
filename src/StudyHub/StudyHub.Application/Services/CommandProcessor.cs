@@ -39,7 +39,6 @@ public class CommandProcessor : ICommandProcessor
 
     private string ParseParameter(string messageText)
     {
-        var parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var parts = messageText.Split(" ", 2);
 
         return parts[1];

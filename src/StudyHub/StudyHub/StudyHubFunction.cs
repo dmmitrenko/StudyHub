@@ -24,6 +24,7 @@ namespace StudyHub
             { "/remind", Commands.Remind },
             { "/feedback", Commands.GetFeedback },
         };
+        private Dictionary<long, string> CommandsResponses = new Dictionary<long, string>();
 
         public StudyHubFunction(
             ILogger<StudyHubFunction> logger,
@@ -119,6 +120,8 @@ namespace StudyHub
             }
 
             var response = await _commandProcessor.HandleCommand(message, parsedCommand, cancellationToken);
+            CommandsResponses.Add(message.Chat.Id, response.Response as string);
+
 
             switch (response.CommandType)
             {
@@ -128,7 +131,7 @@ namespace StudyHub
                     await _telegramBot.SendTextMessageAsync(
                         chatId: message.Chat.Id,
                         text: "Please choose a month:",
-                        replyMarkup: AddReminderCommandHandler.GetMonthSelection(response.Message));
+                        replyMarkup: AddReminderCommandHandler.GetMonthSelection());
                     break;
                 case Commands.AddFeedback:
                     break;
@@ -159,7 +162,7 @@ namespace StudyHub
                         chatId: callbackQuery.Message.Chat.Id,
                         messageId: callbackQuery.Message.MessageId,
                         text: "Please choose a day:",
-                        replyMarkup: AddReminderCommandHandler.GetDaySelection(year, month, title)
+                        replyMarkup: AddReminderCommandHandler.GetDaySelection(year, month)
                     );
                     break;
 
@@ -173,7 +176,7 @@ namespace StudyHub
                         chatId: callbackQuery.Message.Chat.Id,
                         messageId: callbackQuery.Message.MessageId,
                         text: "Please choose a time:",
-                        replyMarkup: AddReminderCommandHandler.GetTimeSelection(year, month, day, title)
+                        replyMarkup: AddReminderCommandHandler.GetTimeSelection(year, month, day)
                     );
                     break;
 
@@ -195,6 +198,7 @@ namespace StudyHub
                     break;
 
                 case "confirm":
+                    callbackQuery.Data += $"_{CommandsResponses[callbackQuery.Message.Chat.Id]}";
                     await _commandProcessor.HandleCommand(callbackQuery, Commands.Remind);
                     await _telegramBot.SendTextMessageAsync(
                         chatId: callbackQuery.Message.Chat.Id,
