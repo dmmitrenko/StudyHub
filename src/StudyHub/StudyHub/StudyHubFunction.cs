@@ -53,8 +53,9 @@ namespace StudyHub
 
                 return new OkResult();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 await _telegramBot.SendTextMessageAsync(
                    update.Message.Chat.Id,
                    $"Something went wrong &#129430;",
