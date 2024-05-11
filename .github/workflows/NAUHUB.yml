@@ -51,4 +51,5 @@ deploy:
       uses: Azure/functions-action@v1
       with:
         app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+        publish-profile: ${{ secrets.NAUHUB_64D8 }}
         package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
