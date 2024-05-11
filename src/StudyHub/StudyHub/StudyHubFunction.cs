@@ -192,7 +192,7 @@ namespace StudyHub
                         chatId: callbackQuery.Message.Chat.Id,
                         messageId: callbackQuery.Message.MessageId,
                         text: $"You selected: {selectedTime}",
-                        replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("Confirm", callbackQuery.Data))
+                        replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("Confirm", $"confirm_{year}_{month}_{day}_{hour}_{minute}_0"))
                     );
                     break;
 
