@@ -6,5 +6,6 @@ namespace StudyHub.Infrastructure;
 public interface ICommandHandler
 {
     Commands CommandKey { get; }
-    Task<CommandResult> HandleCommand(Message message, Dictionary<string, string> parameters, CancellationToken cancellationToken = default);
+    Task<CommandResult> HandleCommand(Message message, string parameter, CancellationToken cancellationToken = default);
+    Task<CommandResult> HandleCommand(CallbackQuery message, CancellationToken cancellationToken = default);
 }

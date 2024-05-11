@@ -22,23 +22,26 @@ public class CommandProcessor : ICommandProcessor
             return new CommandResult(false, Commands.Undefined);
         }
 
-        var parameters = ParseParameters(message.Text);
+        var parameter = ParseParameter(message.Text);
 
-        return await handler.HandleCommand(message, parameters, cancellationToken);
+        return await handler.HandleCommand(message, parameter, cancellationToken);
     }
 
-    private Dictionary<string, string> ParseParameters(string messageText)
+    public async Task<CommandResult> HandleCommand(CallbackQuery message, Commands command, CancellationToken cancellationToken = default)
     {
-        var parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        var parts = Regex.Matches(messageText, @"(-\w+)\s+(?:""(.+?)""|(\S+))")
-            .Cast<Match>()
-            .Select(m => new { Key = m.Groups[1].Value.TrimStart('-'), Value = m.Groups[2].Success ? m.Groups[2].Value : m.Groups[3].Value });
-
-        foreach (var part in parts)
+        if (!_commandHandlers.TryGetValue(command, out var handler))
         {
-            parameters[part.Key] = part.Value;
+            return new CommandResult(false, Commands.Undefined);
         }
 
-        return parameters;
+        return await handler.HandleCommand(message, cancellationToken);
+    }
+
+    private string ParseParameter(string messageText)
+    {
+        var parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var parts = messageText.Split(" ", 2);
+
+        return parts[1];
     }
 }

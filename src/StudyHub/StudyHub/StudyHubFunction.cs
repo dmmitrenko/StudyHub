@@ -128,7 +128,7 @@ namespace StudyHub
                     await _telegramBot.SendTextMessageAsync(
                         chatId: message.Chat.Id,
                         text: "Please choose a month:",
-                        replyMarkup: AddReminderCommandHandler.GetMonthSelection());
+                        replyMarkup: AddReminderCommandHandler.GetMonthSelection(response.Message));
                     break;
                 case Commands.AddFeedback:
                     break;
@@ -146,16 +146,20 @@ namespace StudyHub
             var command = parts[0];
 
             int year = DateTime.Now.Year, month = 0, day = 0;
+            DateTime selectedTime;
+            string title;
 
             switch (command)
             {
                 case "month":
                     month = int.Parse(parts[1]);
+                    title = parts[2];
+
                     await _telegramBot.EditMessageTextAsync(
                         chatId: callbackQuery.Message.Chat.Id,
                         messageId: callbackQuery.Message.MessageId,
                         text: "Please choose a day:",
-                        replyMarkup: AddReminderCommandHandler.GetDaySelection(year, month)
+                        replyMarkup: AddReminderCommandHandler.GetDaySelection(year, month, title)
                     );
                     break;
 
@@ -163,11 +167,13 @@ namespace StudyHub
                     year = int.Parse(parts[1]);
                     month = int.Parse(parts[2]);
                     day = int.Parse(parts[3]);
+                    title = parts[4];
+
                     await _telegramBot.EditMessageTextAsync(
                         chatId: callbackQuery.Message.Chat.Id,
                         messageId: callbackQuery.Message.MessageId,
                         text: "Please choose a time:",
-                        replyMarkup: AddReminderCommandHandler.GetTimeSelection(year, month, day)
+                        replyMarkup: AddReminderCommandHandler.GetTimeSelection(year, month, day, title)
                     );
                     break;
 
@@ -177,17 +183,19 @@ namespace StudyHub
                     day = int.Parse(parts[3]);
                     int hour = int.Parse(parts[4]);
                     int minute = int.Parse(parts[5]);
-                    DateTime selectedTime = new DateTime(year, month, day, hour, minute, 0);
+
+                    selectedTime = new DateTime(year, month, day, hour, minute, 0);
 
                     await _telegramBot.EditMessageTextAsync(
                         chatId: callbackQuery.Message.Chat.Id,
                         messageId: callbackQuery.Message.MessageId,
                         text: $"You selected: {selectedTime}",
-                        replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("Confirm", "confirm"))
+                        replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("Confirm", callbackQuery.Data))
                     );
                     break;
 
                 case "confirm":
+                    await _commandProcessor.HandleCommand(callbackQuery, Commands.Remind);
                     await _telegramBot.SendTextMessageAsync(
                         chatId: callbackQuery.Message.Chat.Id,
                         text: "Your reminder has been set!"

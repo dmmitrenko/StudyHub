@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using StudyHub.Domain;
 using StudyHub.Domain.Enums;
+using StudyHub.Domain.Models;
 using StudyHub.Infrastructure;
 using StudyHub.Infrastructure.Models;
 using StudyHub.Infrastructure.Repositories;
@@ -25,49 +26,42 @@ public class AddReminderCommandHandler : ICommandHandler
 
     public Commands CommandKey => Commands.Remind;
 
-    public async Task<CommandResult> HandleCommand(Message message, Dictionary<string, string> parameters, CancellationToken cancellationToken = default)
+    public async Task<CommandResult> HandleCommand(Message message, string parameter, CancellationToken cancellationToken = default)
     {
-        var inlineKeyboard = GenerateCalendar();
+        var validationResult = CommandValidator.ValidateReminderCommand(parameter, _reminderCommand);
 
-        return new CommandResult(true, CommandKey, inlineKeyboard);
-    }
-
-    public InlineKeyboardMarkup GenerateCalendar()
-    {
-        var currentDate = DateTime.UtcNow;
-        int year = currentDate.Year;
-        int month = currentDate.Month;
-
-        var daysInMonth = DateTime.DaysInMonth(year, month);
-        var firstDayOfMonth = new DateTime(year, month, 1);
-
-        // Визначаємо кількість рядків клавіатури
-        int rows = (int)Math.Ceiling((7 + daysInMonth) / 7.0);
-        InlineKeyboardButton[][] buttons = new InlineKeyboardButton[rows][];
-
-        for (int i = 0, day = 1; i < rows; i++)
+        if (!validationResult.IsValid)
         {
-            buttons[i] = new InlineKeyboardButton[7];  // 7 днів у тижні
-            for (int j = 0; j < 7; j++)
-            {
-                int dayOfWeekIndex = (int)firstDayOfMonth.DayOfWeek;
-                if (i == 0 && j < dayOfWeekIndex || day > daysInMonth)
-                {
-                    // Заповнюємо порожні клітинки невидимими кнопками
-                    buttons[i][j] = InlineKeyboardButton.WithCallbackData(" ", "ignore");
-                }
-                else
-                {
-                    buttons[i][j] = InlineKeyboardButton.WithCallbackData(day.ToString(), $"choose_{year}_{month}_{day}");
-                    day++;
-                }
-            }
+            return new CommandResult(false, CommandKey, Errors: validationResult.Errors);
         }
 
-        return new InlineKeyboardMarkup(buttons);
+        return new CommandResult(true, CommandKey, parameter);
     }
 
-    public static InlineKeyboardMarkup GetMonthSelection()
+    public async Task<CommandResult> HandleCommand(CallbackQuery callbackQuery, CancellationToken cancellationToken = default)
+    {
+        var parts = callbackQuery.Data.Split('_');
+        var year = int.Parse(parts[1]);
+        var month = int.Parse(parts[2]);
+        var day = int.Parse(parts[3]);
+        var hour = int.Parse(parts[4]);
+        var minute = int.Parse(parts[5]);
+        var title = parts[6];
+        var selectedTime = new DateTime(year, month, day, hour, minute, 0);
+
+        var reminder = new Reminder
+        {
+            ChatId = callbackQuery.Message.Chat.Id,
+            SendTime = selectedTime,
+            Text = title,
+        };
+
+        await _reminderRepository.AddReminder(reminder);
+
+        return new CommandResult(true, CommandKey);
+    }
+
+    public static InlineKeyboardMarkup GetMonthSelection(string title)
     {
         var months = new[]
         {
@@ -82,16 +76,16 @@ public class AddReminderCommandHandler : ICommandHandler
         {
             var row = new List<InlineKeyboardButton>
         {
-            InlineKeyboardButton.WithCallbackData(months[i], $"month_{i + 1}"),
-            InlineKeyboardButton.WithCallbackData(months[i + 1], $"month_{i + 2}"),
-            InlineKeyboardButton.WithCallbackData(months[i + 2], $"month_{i + 3}")
+            InlineKeyboardButton.WithCallbackData(months[i], $"month_{i + 1}_{title}"),
+            InlineKeyboardButton.WithCallbackData(months[i + 1], $"month_{i + 2}_{title}"),
+            InlineKeyboardButton.WithCallbackData(months[i + 2], $"month_{i + 3}_{title}")
         };
             keyboard.Add(row);
         }
         return new InlineKeyboardMarkup(keyboard);
     }
 
-    public static InlineKeyboardMarkup GetDaySelection(int year, int month)
+    public static InlineKeyboardMarkup GetDaySelection(int year, int month, string title)
     {
         var daysInMonth = DateTime.DaysInMonth(year, month);
         var keyboard = new List<List<InlineKeyboardButton>>();
@@ -100,14 +94,14 @@ public class AddReminderCommandHandler : ICommandHandler
             var row = new List<InlineKeyboardButton>();
             for (int d = 0; d < 7 && day + d <= daysInMonth; d++)
             {
-                row.Add(InlineKeyboardButton.WithCallbackData((day + d).ToString(), $"date_{year}_{month}_{day + d}"));
+                row.Add(InlineKeyboardButton.WithCallbackData((day + d).ToString(), $"date_{year}_{month}_{day + d}_{title}"));
             }
             keyboard.Add(row);
         }
         return new InlineKeyboardMarkup(keyboard);
     }
 
-    public static InlineKeyboardMarkup GetTimeSelection(int year, int month, int day)
+    public static InlineKeyboardMarkup GetTimeSelection(int year, int month, int day, string title)
     {
         var keyboard = new List<List<InlineKeyboardButton>>();
         for (int hour = 0; hour < 24; hour += 6)
@@ -115,8 +109,8 @@ public class AddReminderCommandHandler : ICommandHandler
             var row = new List<InlineKeyboardButton>();
             for (int h = hour; h < hour + 6 && h < 24; h++)
             {
-                row.Add(InlineKeyboardButton.WithCallbackData($"{h}:00", $"time_{year}_{month}_{day}_{h}_0"));
-                row.Add(InlineKeyboardButton.WithCallbackData($"{h}:30", $"time_{year}_{month}_{day}_{h}_30"));
+                row.Add(InlineKeyboardButton.WithCallbackData($"{h}:00", $"time_{year}_{month}_{day}_{h}_0_{title}"));
+                row.Add(InlineKeyboardButton.WithCallbackData($"{h}:30", $"time_{year}_{month}_{day}_{h}_30_{title}"));
             }
             keyboard.Add(row);
         }
