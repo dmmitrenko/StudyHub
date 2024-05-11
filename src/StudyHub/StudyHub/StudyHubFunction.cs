@@ -199,7 +199,7 @@ namespace StudyHub
                     break;
 
                 case "confirm":
-                    var title = _cacheService.GetCachedReminderTitle(callbackQuery.Message.Chat.Id.ToString());
+                    var title = await _cacheService.GetCachedReminderTitle(callbackQuery.Message.Chat.Id.ToString());
                     callbackQuery.Data += $"_{title}";
                     await _commandProcessor.HandleCommand(callbackQuery, Commands.Remind);
                     await _telegramBot.SendTextMessageAsync(
