@@ -3,5 +3,6 @@ public enum Commands
 {
     Undefined,
     Remind,
-    Feedback
+    AddFeedback,
+    GetFeedback
 }

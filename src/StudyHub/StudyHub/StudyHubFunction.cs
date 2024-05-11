@@ -109,7 +109,7 @@ namespace StudyHub
             {
                 await _telegramBot.SendTextMessageAsync(
                     message.Chat.Id,
-                    "In progress!",
+                    "I don't think that command exists!",
                     disableWebPagePreview: true,
                     parseMode: ParseMode.Html);
 
@@ -120,7 +120,7 @@ namespace StudyHub
 
             await _telegramBot.SendTextMessageAsync(
                 chatId: message.Chat.Id,
-                text: "Choose a date:",
+                text: response.Message ?? null,
                 replyMarkup: response.Response as InlineKeyboardMarkup
             );
         }
