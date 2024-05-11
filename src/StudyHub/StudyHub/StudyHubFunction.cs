@@ -130,8 +130,8 @@ namespace StudyHub
         {
             var parts = callbackQuery.Data.Split('_');
             var command = parts[0];
-            int year = DateTime.Now.Year;
-            int month, day;
+
+            int year = DateTime.Now.Year, month = 0, day = 0;
 
             switch (command)
             {
@@ -144,6 +144,7 @@ namespace StudyHub
                         replyMarkup: AddReminderCommandHandler.GetDaySelection(year, month)
                     );
                     break;
+
                 case "date":
                     month = int.Parse(parts[1]);
                     day = int.Parse(parts[2]);
@@ -154,12 +155,15 @@ namespace StudyHub
                         replyMarkup: AddReminderCommandHandler.GetTimeSelection(year, month, day)
                     );
                     break;
+
                 case "time":
-                    month = int.Parse(parts[1]);
-                    day = int.Parse(parts[2]);
-                    int hour = int.Parse(parts[3]);
-                    int minute = int.Parse(parts[4]);
-                    var selectedTime = new DateTime(year, month, day, hour, minute, 0);
+                    year = int.Parse(parts[1]);
+                    month = int.Parse(parts[2]);
+                    day = int.Parse(parts[3]);
+                    int hour = int.Parse(parts[4]);
+                    int minute = int.Parse(parts[5]);
+                    DateTime selectedTime = new DateTime(year, month, day, hour, minute, 0);
+
                     await _telegramBot.EditMessageTextAsync(
                         chatId: callbackQuery.Message.Chat.Id,
                         messageId: callbackQuery.Message.MessageId,
@@ -167,6 +171,7 @@ namespace StudyHub
                         replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("Confirm", "confirm"))
                     );
                     break;
+
                 case "confirm":
                     await _telegramBot.SendTextMessageAsync(
                         chatId: callbackQuery.Message.Chat.Id,

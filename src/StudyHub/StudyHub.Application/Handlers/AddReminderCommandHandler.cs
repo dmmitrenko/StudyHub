@@ -115,8 +115,8 @@ public class AddReminderCommandHandler : ICommandHandler
             var row = new List<InlineKeyboardButton>();
             for (int h = hour; h < hour + 6 && h < 24; h++)
             {
-                row.Add(InlineKeyboardButton.WithCallbackData($"{h}:00", $"time_{month}_{day}_{h}_0"));
-                row.Add(InlineKeyboardButton.WithCallbackData($"{h}:30", $"time_{month}_{day}_{h}_30"));
+                row.Add(InlineKeyboardButton.WithCallbackData($"{h}:00", $"time_{year}_{month}_{day}_{h}_0"));
+                row.Add(InlineKeyboardButton.WithCallbackData($"{h}:30", $"time_{year}_{month}_{day}_{h}_30"));
             }
             keyboard.Add(row);
         }
