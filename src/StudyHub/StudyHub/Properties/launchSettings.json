@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "StudyHub": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7123",
+      "launchBrowser": false
+    }
+  }
+}
