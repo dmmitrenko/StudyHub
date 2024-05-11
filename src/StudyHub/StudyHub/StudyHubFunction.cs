@@ -120,8 +120,10 @@ namespace StudyHub
             }
 
             var response = await _commandProcessor.HandleCommand(message, parsedCommand, cancellationToken);
-            CommandsResponses.Add(message.Chat.Id, response.Response as string);
-
+            if (response.CommandType == Commands.Remind)
+            {
+                CommandsResponses.Add(message.Chat.Id, response.Response as string);
+            }
 
             switch (response.CommandType)
             {
@@ -150,13 +152,11 @@ namespace StudyHub
 
             int year = DateTime.Now.Year, month = 0, day = 0;
             DateTime selectedTime;
-            string title;
 
             switch (command)
             {
                 case "month":
                     month = int.Parse(parts[1]);
-                    title = parts[2];
 
                     await _telegramBot.EditMessageTextAsync(
                         chatId: callbackQuery.Message.Chat.Id,
@@ -170,7 +170,6 @@ namespace StudyHub
                     year = int.Parse(parts[1]);
                     month = int.Parse(parts[2]);
                     day = int.Parse(parts[3]);
-                    title = parts[4];
 
                     await _telegramBot.EditMessageTextAsync(
                         chatId: callbackQuery.Message.Chat.Id,
