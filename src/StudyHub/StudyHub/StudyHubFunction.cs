@@ -22,6 +22,7 @@ namespace StudyHub
         private readonly Dictionary<string, Commands> CommandMappings = new Dictionary<string, Commands>
         {
             { "/remind", Commands.Remind },
+            { "/feedback", Commands.GetFeedback },
         };
 
         public StudyHubFunction(
@@ -119,11 +120,24 @@ namespace StudyHub
 
             var response = await _commandProcessor.HandleCommand(message, parsedCommand, cancellationToken);
 
-            await _telegramBot.SendTextMessageAsync(
-                    chatId: message.Chat.Id,
-                    text: "Please choose a month:",
-                    replyMarkup: AddReminderCommandHandler.GetMonthSelection()
-                );
+            switch (response.CommandType)
+            {
+                case Commands.Undefined:
+                    break;
+                case Commands.Remind:
+                    await _telegramBot.SendTextMessageAsync(
+                        chatId: message.Chat.Id,
+                        text: "Please choose a month:",
+                        replyMarkup: AddReminderCommandHandler.GetMonthSelection());
+                    break;
+                case Commands.AddFeedback:
+                    break;
+                case Commands.GetFeedback:
+                    break;
+                default:
+                    break;
+            }
+            
         }
 
         public async Task HandleCallbackQuery(CallbackQuery callbackQuery)
@@ -146,8 +160,9 @@ namespace StudyHub
                     break;
 
                 case "date":
-                    month = int.Parse(parts[1]);
-                    day = int.Parse(parts[2]);
+                    year = int.Parse(parts[1]);
+                    month = int.Parse(parts[2]);
+                    day = int.Parse(parts[3]);
                     await _telegramBot.EditMessageTextAsync(
                         chatId: callbackQuery.Message.Chat.Id,
                         messageId: callbackQuery.Message.MessageId,
