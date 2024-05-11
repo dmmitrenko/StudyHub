@@ -65,11 +65,11 @@ public class AddReminderCommandHandler : ICommandHandler
     {
         var months = new[]
         {
-        "Січень", "Лютий", "Березень",
-        "Квітень", "Травень", "Червень",
-        "Липень", "Серпень", "Вересень",
-        "Жовтень", "Листопад", "Грудень"
-    };
+            "Січень", "Лютий", "Березень",
+            "Квітень", "Травень", "Червень",
+            "Липень", "Серпень", "Вересень",
+            "Жовтень", "Листопад", "Грудень"
+        };
 
         var keyboard = new List<List<InlineKeyboardButton>>();
         for (int i = 0; i < months.Length; i += 3)

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 using StudyHub.Application.Handlers;
 using StudyHub.Application.MapperProfiles;
 using StudyHub.Application.Services;
@@ -42,5 +43,17 @@ public static class ServiceExtensions
 
         services.AddOptions<ReminderCommandSettings>()
                 .Configure(options => configuration.GetSection(nameof(ReminderCommandSettings)).Bind(options));
+
+        services.AddOptions<CacheSettings>()
+            .Configure(options => configuration.GetSection(nameof(CacheSettings)).Bind(options));
+    }
+
+    public static void AddRedis(this IServiceCollection services)
+    {
+        var redisConnectionString = Environment.GetEnvironmentVariable("RedisConnectionString");
+        var multiplexer = ConnectionMultiplexer.Connect(redisConnectionString);
+
+        services.AddSingleton<IConnectionMultiplexer>(multiplexer);
+        services.AddSingleton(provider => provider.GetService<IConnectionMultiplexer>().GetDatabase());
     }
 }

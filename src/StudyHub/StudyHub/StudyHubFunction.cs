@@ -19,21 +19,23 @@ namespace StudyHub
         private readonly ILogger<StudyHubFunction> _logger;
         private readonly ITelegramBotClient _telegramBot;
         private readonly ICommandProcessor _commandProcessor;
+        private readonly ICacheService _cacheService;
         private readonly Dictionary<string, Commands> CommandMappings = new Dictionary<string, Commands>
         {
             { "/remind", Commands.Remind },
             { "/feedback", Commands.GetFeedback },
         };
-        private Dictionary<long, string> CommandsResponses = new Dictionary<long, string>();
 
         public StudyHubFunction(
             ILogger<StudyHubFunction> logger,
             ITelegramBotClient telegramBot,
-            ICommandProcessor commandProcessor)
+            ICommandProcessor commandProcessor,
+            ICacheService cacheService)
         {
             _logger = logger;
             _telegramBot = telegramBot;
             _commandProcessor = commandProcessor;
+            _cacheService = cacheService;
         }
 
         [Function("StudyHub")]
@@ -122,7 +124,7 @@ namespace StudyHub
             var response = await _commandProcessor.HandleCommand(message, parsedCommand, cancellationToken);
             if (response.CommandType == Commands.Remind)
             {
-                CommandsResponses.Add(message.Chat.Id, response.Response as string);
+                await _cacheService.SetCachedReminderTitle(message.Chat.Id.ToString(), response.Response as string);
             }
 
             switch (response.CommandType)
@@ -197,7 +199,8 @@ namespace StudyHub
                     break;
 
                 case "confirm":
-                    callbackQuery.Data += $"_{CommandsResponses[callbackQuery.Message.Chat.Id]}";
+                    var title = _cacheService.GetCachedReminderTitle(callbackQuery.Message.Chat.Id.ToString());
+                    callbackQuery.Data += $"_{title}";
                     await _commandProcessor.HandleCommand(callbackQuery, Commands.Remind);
                     await _telegramBot.SendTextMessageAsync(
                         chatId: callbackQuery.Message.Chat.Id,
