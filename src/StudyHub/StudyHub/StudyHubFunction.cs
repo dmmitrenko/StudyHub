@@ -136,7 +136,7 @@ namespace StudyHub
                 case Commands.Remind:
                     await _telegramBot.SendTextMessageAsync(
                         chatId: message.Chat.Id,
-                        text: "Обери місяць &#x1F9E8;:",
+                        text: System.Net.WebUtility.HtmlEncode("Обери місяць &#x1F9E8;:"),
                         replyMarkup: AddReminderCommandHandler.GetMonthSelection(),
                         parseMode: ParseMode.Html);
                     break;
@@ -148,7 +148,7 @@ namespace StudyHub
                     var reminders = response.Response as List<Reminder>;
                     await _telegramBot.SendTextMessageAsync(
                         chatId: message.Chat.Id,
-                        text: "Твої нагадування:\n" + string.Join("\n", reminders.Select(s => $"&#128073 <code> {s.Text} {s.SendTime} </code>")),
+                        text: System.Net.WebUtility.HtmlEncode("Твої нагадування:\n" + string.Join("\n", reminders.Select(s => $"&#128073 <code> {s.Text} {s.SendTime} </code>"))),
                         parseMode: ParseMode.Html);
                     break;
                 default:
@@ -173,7 +173,7 @@ namespace StudyHub
                     await _telegramBot.EditMessageTextAsync(
                         chatId: callbackQuery.Message.Chat.Id,
                         messageId: callbackQuery.Message.MessageId,
-                        text: "Обери день &#128336;:",
+                        text: System.Net.WebUtility.HtmlEncode("Обери день &#128336;:"),
                         replyMarkup: AddReminderCommandHandler.GetDaySelection(year, month),
                         parseMode: ParseMode.Html
                     );
@@ -187,7 +187,7 @@ namespace StudyHub
                     await _telegramBot.EditMessageTextAsync(
                         chatId: callbackQuery.Message.Chat.Id,
                         messageId: callbackQuery.Message.MessageId,
-                        text: "Оберай час &#128204;:",
+                        text: System.Net.WebUtility.HtmlEncode("Обирай час &#128204;:"),
                         replyMarkup: AddReminderCommandHandler.GetTimeSelection(year, month, day),
                         parseMode: ParseMode.Html
                     );
@@ -205,7 +205,7 @@ namespace StudyHub
                     await _telegramBot.EditMessageTextAsync(
                         chatId: callbackQuery.Message.Chat.Id,
                         messageId: callbackQuery.Message.MessageId,
-                        text: $"Твоє нагадування &#128406;: {selectedTime}",
+                        text: System.Net.WebUtility.HtmlEncode($"Твоє нагадування &#128406;: {selectedTime}"),
                         replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("Confirm", $"confirm_{year}_{month}_{day}_{hour}_{minute}_0")),
                         parseMode: ParseMode.Html
                     );
@@ -217,7 +217,8 @@ namespace StudyHub
                     await _commandProcessor.HandleCommand(callbackQuery, Commands.Remind);
                     await _telegramBot.SendTextMessageAsync(
                         chatId: callbackQuery.Message.Chat.Id,
-                        text: "Your reminder has been set!"
+                        text: System.Net.WebUtility.HtmlEncode("Твоє нагадування очікує тебе! {&#127881;}"),
+                        parseMode: ParseMode.Html
                     );
                     break;
             }
