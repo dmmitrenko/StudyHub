@@ -212,7 +212,8 @@ namespace StudyHub
                     await _telegramBot.SendTextMessageAsync(
                         chatId: message.Chat.Id,
                         text: $"Your reminders:\n" + string.Join("\n", reminders.Select(s => $"&#128073 <code> {s.Text} {s.SendTime} </code> " + (!string.IsNullOrEmpty(s.Link) ? $" <a href='{s.Link}'>Class link</a>" : ""))),
-                        parseMode: ParseMode.Html);
+                        parseMode: ParseMode.Html,
+                        disableWebPagePreview: true);
                     break;
                 default:
                     break;
@@ -270,8 +271,7 @@ namespace StudyHub
                         messageId: callbackQuery.Message.MessageId,
                         text: $"Your reminder &#128406;: {selectedTime}",
                         replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("Confirm", $"confirm_{year}_{month}_{day}_{hour}_{minute}_0")),
-                        parseMode: ParseMode.Html,
-                        disableWebPagePreview: true
+                        parseMode: ParseMode.Html);
                     );
                     break;
 
