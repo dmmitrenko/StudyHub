@@ -211,7 +211,7 @@ namespace StudyHub
                     var reminders = response.Response as List<Reminder>;
                     await _telegramBot.SendTextMessageAsync(
                         chatId: message.Chat.Id,
-                        text: $"Your reminders:\n" + string.Join("\n", reminders.Select(s => $"&#128073 <code> {s.Text} {s.SendTime} </code>")),
+                        text: $"Your reminders:\n" + string.Join("\n", reminders.Select(s => $"&#128073 <code> {s.Text} {s.SendTime} </code> " + (!string.IsNullOrEmpty(s.Link) ? $" <a href='{s.Link}'>Link to the class</a>" : ""))),
                         parseMode: ParseMode.Html);
                     break;
                 default:
@@ -308,7 +308,8 @@ namespace StudyHub
                 {
                     Text = line.Split(",")[0],
                     ChatId = chatId,
-                    SendTime = DateTime.Parse(line.Split(",")[1])
+                    SendTime = DateTime.Parse(line.Split(",")[1]),
+                    Link = line.Split(",")[2]
                 };
 
                 reminders.Add(reminder);
