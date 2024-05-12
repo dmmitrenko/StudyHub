@@ -270,7 +270,8 @@ namespace StudyHub
                         messageId: callbackQuery.Message.MessageId,
                         text: $"Your reminder &#128406;: {selectedTime}",
                         replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("Confirm", $"confirm_{year}_{month}_{day}_{hour}_{minute}_0")),
-                        parseMode: ParseMode.Html
+                        parseMode: ParseMode.Html,
+                        disableWebPagePreview: true
                     );
                     break;
 
