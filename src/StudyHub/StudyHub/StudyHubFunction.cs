@@ -182,8 +182,8 @@ namespace StudyHub
                     var tutorName = feedbacks.FirstOrDefault();
                     await _telegramBot.SendTextMessageAsync(
                         chatId: message.Chat.Id,
-                        text: $"Feedback on {tutorName.TutorSurname + " " + tutorName.TutorName + " " + tutorName.TutorMiddleName} &#127775; \n" +
-                        string.Join("\n", feedbacks.Select(x => $"&#127775; {x.Rate} \n {x.Text}")),
+                        text: $"Feedback on <code>{tutorName.TutorSurname + " " + tutorName.TutorName + " " + tutorName.TutorMiddleName} <code> &#127775; \n" +
+                        string.Join("\n\n", feedbacks.Select(x => $"&#127775; {x.Rate} \n {x.Text}")),
                         parseMode: ParseMode.Html);
                     break;
                 case Commands.GetReminders:
