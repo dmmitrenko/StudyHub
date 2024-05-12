@@ -128,6 +128,7 @@ namespace StudyHub
                 }
 
                 await ParseCsvFile(filePath, message.Chat.Id);
+                return;
             }
 
 
@@ -309,7 +310,14 @@ namespace StudyHub
                     ChatId = chatId,
                     SendTime = DateTime.Parse(line.Split(",")[1])
                 };
-                await _telegramBot.SendTextMessageAsync(chatId, reminder.SendTime.ToString());
+
+                reminders.Add(reminder);
+                await _commandProcessor.HandleCommand(default, reminders, Commands.Remind);
+                await _telegramBot.SendTextMessageAsync(
+                        chatId: chatId,
+                        text: "Your reminders have been added! Don't forget your classes! &#129310",
+                        parseMode: ParseMode.Html
+                    );
             }
 
         }

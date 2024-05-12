@@ -118,8 +118,14 @@ public class AddReminderCommandHandler : ICommandHandler
         return new InlineKeyboardMarkup(keyboard);
     }
 
-    public Task<CommandResult> HandleCommand(Message message, object parameter, CancellationToken cancellationToken = default)
+    public async Task<CommandResult> HandleCommand(Message message, object parameter, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var reminders = parameter as List<Reminder>;
+        foreach (var reminder in reminders)
+        {
+            await _reminderRepository.AddReminder(reminder);
+        }
+
+        return new CommandResult(true, Commands.AddFeedback);
     }
 }
