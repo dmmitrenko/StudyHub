@@ -302,10 +302,10 @@ namespace StudyHub
             using (var reader = new StreamReader(filePath))
             using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
             {
-                var records = csv.GetRecords<dynamic>();
-                foreach (var record in records)
+                var lines = System.IO.File.ReadAllLines(filePath);
+                foreach (var line in lines)
                 {
-                    await _telegramBot.SendTextMessageAsync(chatId, $"Запис: {record}");
+                    await _telegramBot.SendTextMessageAsync(chatId, line);
                 }
             }
         }
