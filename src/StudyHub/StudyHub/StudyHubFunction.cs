@@ -136,8 +136,9 @@ namespace StudyHub
                 case Commands.Remind:
                     await _telegramBot.SendTextMessageAsync(
                         chatId: message.Chat.Id,
-                        text: "Please choose a month:",
-                        replyMarkup: AddReminderCommandHandler.GetMonthSelection());
+                        text: "Обери місяць &#x1F9E8;:",
+                        replyMarkup: AddReminderCommandHandler.GetMonthSelection(),
+                        parseMode: ParseMode.Html);
                     break;
                 case Commands.AddFeedback:
                     break;
@@ -147,7 +148,7 @@ namespace StudyHub
                     var reminders = response.Response as List<Reminder>;
                     await _telegramBot.SendTextMessageAsync(
                         chatId: message.Chat.Id,
-                        text: "Your reminders:\n" + string.Join("\n", reminders.Select(s => $"&#128073 <code> {s.Text} {s.SendTime} </code>")),
+                        text: "Твої нагадування:\n" + string.Join("\n", reminders.Select(s => $"&#128073 <code> {s.Text} {s.SendTime} </code>")),
                         parseMode: ParseMode.Html);
                     break;
                 default:
@@ -172,8 +173,9 @@ namespace StudyHub
                     await _telegramBot.EditMessageTextAsync(
                         chatId: callbackQuery.Message.Chat.Id,
                         messageId: callbackQuery.Message.MessageId,
-                        text: "Please choose a day:",
-                        replyMarkup: AddReminderCommandHandler.GetDaySelection(year, month)
+                        text: "Обери день &#128336;:",
+                        replyMarkup: AddReminderCommandHandler.GetDaySelection(year, month),
+                        parseMode: ParseMode.Html
                     );
                     break;
 
@@ -185,8 +187,9 @@ namespace StudyHub
                     await _telegramBot.EditMessageTextAsync(
                         chatId: callbackQuery.Message.Chat.Id,
                         messageId: callbackQuery.Message.MessageId,
-                        text: "Please choose a time:",
-                        replyMarkup: AddReminderCommandHandler.GetTimeSelection(year, month, day)
+                        text: "Оберай час &#128204;:",
+                        replyMarkup: AddReminderCommandHandler.GetTimeSelection(year, month, day),
+                        parseMode: ParseMode.Html
                     );
                     break;
 
@@ -202,8 +205,9 @@ namespace StudyHub
                     await _telegramBot.EditMessageTextAsync(
                         chatId: callbackQuery.Message.Chat.Id,
                         messageId: callbackQuery.Message.MessageId,
-                        text: $"You selected: {selectedTime}",
-                        replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("Confirm", $"confirm_{year}_{month}_{day}_{hour}_{minute}_0"))
+                        text: $"Твоє нагадування &#128406;: {selectedTime}",
+                        replyMarkup: new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData("Confirm", $"confirm_{year}_{month}_{day}_{hour}_{minute}_0")),
+                        parseMode: ParseMode.Html
                     );
                     break;
 
