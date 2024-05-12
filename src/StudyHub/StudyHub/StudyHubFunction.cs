@@ -216,7 +216,7 @@ namespace StudyHub
                 default:
                     break;
             }
-            
+
         }
 
         public async Task HandleCallbackQuery(CallbackQuery callbackQuery)
@@ -299,15 +299,19 @@ namespace StudyHub
 
         public async Task ParseCsvFile(string filePath, long chatId)
         {
-            using (var reader = new StreamReader(filePath))
-            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            var reminders = new List<Reminder>();
+            var lines = System.IO.File.ReadAllLines(filePath);
+            foreach (var line in lines)
             {
-                var lines = System.IO.File.ReadAllLines(filePath);
-                foreach (var line in lines)
+                var reminder = new Reminder
                 {
-                    await _telegramBot.SendTextMessageAsync(chatId, line);
-                }
+                    Text = line.Split(",")[0],
+                    ChatId = chatId,
+                    SendTime = DateTime.Parse(line.Split(",")[1])
+                };
+                await _telegramBot.SendTextMessageAsync(chatId, reminder.SendTime.ToString());
             }
+
         }
     }
 }
