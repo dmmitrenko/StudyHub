@@ -7,4 +7,5 @@ public interface ICommandProcessor
 {
     Task<CommandResult> HandleCommand(Message message, Commands command, CancellationToken cancellationToken = default);
     Task<CommandResult> HandleCommand(CallbackQuery message, Commands command, CancellationToken cancellationToken = default);
+    Task<CommandResult> HandleCommand(Message message, object parameter, Commands command, CancellationToken cancellationToken = default);
 }

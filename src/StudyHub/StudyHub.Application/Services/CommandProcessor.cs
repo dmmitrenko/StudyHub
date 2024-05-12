@@ -37,6 +37,16 @@ public class CommandProcessor : ICommandProcessor
         return await handler.HandleCommand(message, cancellationToken);
     }
 
+    public async Task<CommandResult> HandleCommand(Message message, object parameter, Commands command, CancellationToken cancellationToken = default)
+    {
+        if (!_commandHandlers.TryGetValue(command, out var handler))
+        {
+            return new CommandResult(false, Commands.Undefined);
+        }
+
+        return await handler.HandleCommand(message, parameter, cancellationToken);
+    }
+
     private string ParseParameter(string messageText)
     {
         var parts = messageText.Split(" ", 2);

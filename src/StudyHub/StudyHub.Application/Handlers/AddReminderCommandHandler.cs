@@ -117,4 +117,9 @@ public class AddReminderCommandHandler : ICommandHandler
         }
         return new InlineKeyboardMarkup(keyboard);
     }
+
+    public Task<CommandResult> HandleCommand(Message message, object parameter, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 }

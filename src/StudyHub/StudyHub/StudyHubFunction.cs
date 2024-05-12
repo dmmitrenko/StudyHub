@@ -25,7 +25,8 @@ namespace StudyHub
         {
             { "/remind", Commands.Remind },
             { "/feedback", Commands.GetFeedback },
-            { "/getReminders", Commands.GetReminders }
+            { "/getReminders", Commands.GetReminders },
+            { "/addFeedback", Commands.AddFeedback }
         };
 
         public StudyHubFunction(
@@ -110,6 +111,30 @@ namespace StudyHub
 
         private async Task BotOnMessageReceived(Message? message, CancellationToken cancellationToken)
         {
+            string state = await _cacheService.GetCachedValue($"feedback_{message.Chat.Id}");
+
+            if (!string.IsNullOrEmpty(state))
+            {
+                await _cacheService.DeleteKey($"feedback_{message.Chat.Id}");
+                if (message.Text != "skip")
+                {
+                    var feedback = await _cacheService.GetFeedback(Commands.AddFeedback + "_" + message.Chat.Id.ToString());
+
+                    feedback.Text = message.Text;
+                    feedback.Rate = ushort.Parse(state);
+
+                    await _commandProcessor.HandleCommand(message, feedback, Commands.AddFeedback);
+
+                    await _telegramBot.SendTextMessageAsync(
+                        chatId: message.Chat.Id,
+                        text: "Feedback recorded! &#127881;",
+                        parseMode: ParseMode.Html
+                    );
+
+                    return;
+                }
+            }
+
             var command = message.Text.Split(new[] { ' ' })[0];
 
             if (!CommandMappings.TryGetValue(command, out var parsedCommand))
@@ -126,7 +151,12 @@ namespace StudyHub
             var response = await _commandProcessor.HandleCommand(message, parsedCommand, cancellationToken);
             if (response.CommandType == Commands.Remind)
             {
-                await _cacheService.SetCachedReminderTitle(message.Chat.Id.ToString(), response.Response as string);
+                await _cacheService.SetCachedValue(Commands.Remind.ToString() + "_" + message.Chat.Id.ToString(), response.Response as string);
+            }
+
+            if (response.CommandType == Commands.AddFeedback)
+            {
+                await _cacheService.SetFeedback(Commands.AddFeedback + "_" + message.Chat.Id.ToString(), response.Response as Feedback);
             }
 
             switch (response.CommandType)
@@ -141,6 +171,11 @@ namespace StudyHub
                         parseMode: ParseMode.Html);
                     break;
                 case Commands.AddFeedback:
+                    await _telegramBot.SendTextMessageAsync(
+                        chatId: message.Chat.Id,
+                        text: $"Rate your tutor &#127775;",
+                        replyMarkup: AddTutorFeedbackCommandHandler.GetRateSelection(),
+                        parseMode: ParseMode.Html);
                     break;
                 case Commands.GetFeedback:
                     break;
@@ -212,14 +247,25 @@ namespace StudyHub
                     break;
 
                 case "confirm":
-                    var title = await _cacheService.GetCachedReminderTitle(callbackQuery.Message.Chat.Id.ToString());
+                    var title = await _cacheService.GetCachedValue(callbackQuery.Message.Chat.Id.ToString());
                     callbackQuery.Data += $"_{title}";
                     await _commandProcessor.HandleCommand(callbackQuery, Commands.Remind);
                     await _telegramBot.SendTextMessageAsync(
                         chatId: callbackQuery.Message.Chat.Id,
-                        text: "Your reminder is waiting for you! {&#127881;}",
+                        text: "Your reminder is waiting for you! &#127881;",
                         parseMode: ParseMode.Html
                     );
+                    break;
+
+                case "rate":
+                    var rate = int.Parse(parts[1]);
+                    await _cacheService.SetCachedValue($"feedback_{callbackQuery.Message.Chat.Id}", rate.ToString());
+
+                    await _telegramBot.SendTextMessageAsync(
+                        chatId: callbackQuery.Message.Chat.Id,
+                        text: "Give us your feedback! If you have nothing to say, write skip. &#127773;",
+                        parseMode: ParseMode.Html
+                        );
                     break;
             }
         }

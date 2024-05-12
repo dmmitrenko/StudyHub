@@ -36,7 +36,9 @@ public static class ServiceExtensions
         services.AddScoped<ICommandProcessor, CommandProcessor>();
         services.AddScoped<ICommandHandler, AddReminderCommandHandler>();
         services.AddScoped<ICommandHandler, GetRemindersCommandHandler>();
+        services.AddScoped<ICommandHandler, AddTutorFeedbackCommandHandler>();
         services.AddScoped<IReminderRepository, ReminderRepository>();
+        services.AddScoped<IFeedbackRepository, TutorFeedbackRepository>();
     }
 
     public static void ConfigureSettings(this IServiceCollection services, IConfiguration configuration)

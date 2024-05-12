@@ -8,7 +8,7 @@ public class Feedback : ITableEntity
     public string TutorSurname { get; set; }
     public string TutorMiddleName { get; set; }
     public string Text { get; set; }
-    public ushort Rate { get; set; }
+    public int Rate { get; set; }
     public string PartitionKey { get; set; }
     public string RowKey { get; set; }
     public DateTimeOffset? Timestamp { get; set; }

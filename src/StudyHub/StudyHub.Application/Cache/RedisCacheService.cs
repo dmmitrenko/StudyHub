@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using StackExchange.Redis;
+using StudyHub.Domain.Models;
 using StudyHub.Infrastructure.Services;
 using StudyHub.Infrastructure.Settings;
 
@@ -17,7 +19,12 @@ public class RedisCacheService : ICacheService
         _cacheSettings = cacheSettings.Value;
     }
 
-    public async Task<string> GetCachedReminderTitle(string key)
+    public async Task DeleteKey(string key)
+    {
+        _cache.KeyDelete(key);
+    }
+
+    public async Task<string> GetCachedValue(string key)
     {
         var data = await _cache.StringGetAsync(key);
         if (data.IsNullOrEmpty)
@@ -26,8 +33,23 @@ public class RedisCacheService : ICacheService
         return data.ToString();
     }
 
-    public async Task SetCachedReminderTitle(string key, string reminderTitle)
+    public async Task<Feedback> GetFeedback(string key)
+    {
+        var data = await _cache.StringGetAsync(key);
+        if (data.IsNullOrEmpty)
+            return new Feedback();
+
+        return JsonConvert.DeserializeObject<Feedback>(data!)!;
+    }
+
+    public async Task SetCachedValue(string key, string reminderTitle)
     {
         await _cache.StringSetAsync(key, reminderTitle, _cacheSettings.Expiry);
+    }
+
+    public async Task SetFeedback(string key, Feedback feedback)
+    {
+        var feedbackJson = JsonConvert.SerializeObject(feedback);
+        await _cache.StringSetAsync(key, feedbackJson, _cacheSettings.Expiry);
     }
 }

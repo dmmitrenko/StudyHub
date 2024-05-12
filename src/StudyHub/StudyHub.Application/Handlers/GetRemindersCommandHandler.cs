@@ -27,4 +27,9 @@ public class GetRemindersCommandHandler : ICommandHandler
     {
         throw new NotImplementedException();
     }
+
+    public Task<CommandResult> HandleCommand(Message message, object parameter, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 }

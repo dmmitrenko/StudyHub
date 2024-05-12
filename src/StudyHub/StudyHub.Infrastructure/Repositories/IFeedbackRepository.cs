@@ -5,5 +5,5 @@ public interface IFeedbackRepository
 {
     Task AddTutorFeedback(Feedback reminder);
     Task DeleteTutorFeedback(Feedback reminder);
-    Task<Reminder> GetFeedbacksForTutor(string tutorFullName);
+    Task<List<Feedback>> GetFeedbacksForTutor(string tutorFullName);
 }
