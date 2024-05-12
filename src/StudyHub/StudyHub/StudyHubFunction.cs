@@ -12,6 +12,9 @@ using StudyHub.Infrastructure.Services;
 using Telegram.Bot.Types.ReplyMarkups;
 using StudyHub.Application.Handlers;
 using StudyHub.Domain.Models;
+using System.Formats.Asn1;
+using System.Globalization;
+using CsvHelper;
 
 namespace StudyHub
 {
@@ -111,6 +114,23 @@ namespace StudyHub
 
         private async Task BotOnMessageReceived(Message? message, CancellationToken cancellationToken)
         {
+            if (message.Type == MessageType.Document)
+            {
+                var document = message.Document;
+                await _telegramBot.SendTextMessageAsync(message.Chat.Id, "&#128076; File accepted, I'll start processing....", parseMode: ParseMode.Html);
+
+                var file = await _telegramBot.GetFileAsync(document.FileId);
+                var filePath = Path.Combine(Path.GetTempPath(), document.FileName);
+
+                using (var saveImageStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await _telegramBot.DownloadFileAsync(file.FilePath, saveImageStream);
+                }
+
+                await ParseCsvFile(filePath, message.Chat.Id);
+            }
+
+
             string state = await _cacheService.GetCachedValue($"feedback_{message.Chat.Id}");
 
             if (!string.IsNullOrEmpty(state))
@@ -274,6 +294,19 @@ namespace StudyHub
                         parseMode: ParseMode.Html
                         );
                     break;
+            }
+        }
+
+        public async Task ParseCsvFile(string filePath, long chatId)
+        {
+            using (var reader = new StreamReader(filePath))
+            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            {
+                var records = csv.GetRecords<dynamic>();
+                foreach (var record in records)
+                {
+                    await _telegramBot.SendTextMessageAsync(chatId, $"Запис: {record}");
+                }
             }
         }
     }
