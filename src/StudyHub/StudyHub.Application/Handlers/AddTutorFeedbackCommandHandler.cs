@@ -24,8 +24,8 @@ public class AddTutorFeedbackCommandHandler : ICommandHandler
         var parts = parameter.Split(' ');
         var feedback = new Domain.Models.Feedback
         {
-            TutorName = parts[0],
-            TutorSurname = parts[1],
+            TutorName = parts[1],
+            TutorSurname = parts[0],
             TutorMiddleName = parts[2]
         };
 

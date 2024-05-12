@@ -178,6 +178,13 @@ namespace StudyHub
                         parseMode: ParseMode.Html);
                     break;
                 case Commands.GetFeedback:
+                    var feedbacks = response.Response as List<Feedback>;
+                    var tutorName = feedbacks.FirstOrDefault();
+                    await _telegramBot.SendTextMessageAsync(
+                        chatId: message.Chat.Id,
+                        text: $"Feedback on {tutorName.TutorSurname + " " + tutorName.TutorName + " " + tutorName.TutorMiddleName} &#127775; \n" +
+                        string.Join("\n", feedbacks.Select(x => $"&#127775; {x.Rate} \n {x.Text}")),
+                        parseMode: ParseMode.Html);
                     break;
                 case Commands.GetReminders:
                     var reminders = response.Response as List<Reminder>;

@@ -2,20 +2,28 @@
 using StudyHub.Domain.Enums;
 using StudyHub.Infrastructure;
 using StudyHub.Infrastructure.Models;
+using StudyHub.Infrastructure.Repositories;
 using Telegram.Bot.Types;
 
 namespace StudyHub.Application.Handlers;
 public class GetTutorFeedbackCommandHandler : ICommandHandler
 {
-    public GetTutorFeedbackCommandHandler(IMapper mapper)
+    private readonly IFeedbackRepository _feedbackRepository;
+
+    public GetTutorFeedbackCommandHandler(
+        IMapper mapper,
+        IFeedbackRepository feedbackRepository)
     {
+        _feedbackRepository = feedbackRepository;
     }
 
     public Commands CommandKey => Commands.GetFeedback;
 
-    public Task<CommandResult> HandleCommand(Message message, string parameter, CancellationToken cancellationToken = default)
+    public async Task<CommandResult> HandleCommand(Message message, string parameter, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        parameter = string.Join("_", parameter.Split(" "));
+        var feedbacks = await _feedbackRepository.GetFeedbacksForTutor(parameter);
+        return new CommandResult(true, Commands.GetFeedback, feedbacks);
     }
 
     public Task<CommandResult> HandleCommand(CallbackQuery message, CancellationToken cancellationToken = default)
